@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.prakharrr.drainwatch</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/prakharrr/.local/bin/drainwatch.sh</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>DRAINWATCH_THRESHOLD</key>
+		<string>80</string>
+		<key>DRAINWATCH_SUSTAIN</key>
+		<string>600</string>
+	</dict>
+	<key>StartInterval</key>
+	<integer>60</integer>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StandardOutPath</key>
+	<string>/Users/prakharrr/Library/Logs/drainwatch.out.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/prakharrr/Library/Logs/drainwatch.err.log</string>
+</dict>
+</plist>

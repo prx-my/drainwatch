@@ -1,0 +1,56 @@
+#!/bin/bash
+#
+# drainwatch-kill - confirm and kill a process flagged by drainwatch.
+# Usage: drainwatch-kill <pid|process-name>
+#
+set -u
+export PATH=/usr/bin:/bin:/usr/sbin:/sbin
+LOG="$HOME/Library/Logs/drainwatch.log"
+
+if [ $# -ne 1 ]; then
+  echo "usage: drainwatch-kill <pid|process-name>"
+  exit 1
+fi
+arg=$1
+
+if [[ "$arg" =~ ^[0-9]+$ ]]; then
+  pids=$arg
+else
+  pids=$(pgrep -f "$arg" | tr '\n' ' ')
+fi
+
+if [ -z "${pids// /}" ]; then
+  echo "No matching process for: $arg"
+  exit 1
+fi
+
+list=$(echo "$pids" | tr ' ' ',')
+echo "Matched process(es):"
+ps -p "$list" -o pid,ppid,user,pcpu,etime,comm 2>/dev/null
+echo
+printf "Kill the above? [y/N] "
+read -r ans
+case "$ans" in
+  y|Y|yes|YES) ;;
+  *) echo "Aborted. Nothing killed."; exit 0 ;;
+esac
+
+ts=$(date '+%Y-%m-%d %H:%M:%S')
+for pid in $pids; do
+  full=$(ps -p "$pid" -o comm= 2>/dev/null)
+  if [ -n "$full" ]; then name=$(basename "$full"); else name="pid$pid"; fi
+
+  if kill "$pid" 2>/dev/null; then
+    sleep 3
+    if ps -p "$pid" >/dev/null 2>&1; then
+      if kill -9 "$pid" 2>/dev/null; then status="SIGKILL"; else status="FAILED (permission? use sudo)"; fi
+    else
+      status="SIGTERM (clean exit)"
+    fi
+  else
+    status="FAILED (permission? use sudo)"
+  fi
+
+  echo "  pid=$pid  $name  -> $status"
+  echo "$ts  KILL  pid=$pid  name=$name  result=$status" >> "$LOG"
+done
